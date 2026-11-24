@@ -93,6 +93,11 @@ class BaseballBuddy:
                     last_exc = exc
                     continue
                 raise
+            except errors.ClientError as exc:
+                if getattr(exc, "code", None) == 429:  # rate limit
+                    last_exc = exc
+                    continue
+                raise
 
         raise last_exc or RuntimeError("No models available for BaseballBuddy.")
 
