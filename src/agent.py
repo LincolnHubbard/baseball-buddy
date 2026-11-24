@@ -12,7 +12,7 @@ load_dotenv()
 # the models should ideally be in order from newest to oldest
 # using just gemini 3.8 resulted in a lot of 503 errors - google is busy!
 MODELS: list[str] = [
-    "gemini-3.8-flash",
+    # "gemini-3.8-flash", disable this model for now, rate limit is extremely low
     "gemini-3.5-flash-lite",
     "gemini-3.1-flash-lite"
 ]
