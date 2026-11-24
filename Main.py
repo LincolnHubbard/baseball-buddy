@@ -1,5 +1,6 @@
 import os
 import streamlit as st
+import bcrypt
 from dotenv import load_dotenv
 
 from src.agent import BaseballBuddy
@@ -9,6 +10,36 @@ load_dotenv()
 st.set_page_config(page_title="Baseball Buddy")
 st.title("Baseball Buddy")
 st.caption("Ask me questions about MLB hitters!")
+
+
+def get_password_hash():
+    try:
+        if "HASHED_PASSWORD" in st.secrets:
+            return st.secrets["HASHED_PASSWORD"]
+    except Exception:
+        # No secrets file found locally, fall back to .env
+        pass
+    return os.getenv("HASHED_PASSWORD")
+
+
+def check_password():
+    if st.session_state.get("authed"):  # this will reset when the page is refreshed for now
+        return True
+
+    stored_hash = get_password_hash()
+    pw = st.text_input("Password", type="password")
+    if pw:
+        if bcrypt.checkpw(pw.encode(), stored_hash.encode()):
+            st.session_state.authed = True
+            st.rerun()
+        else:
+            st.error("Incorrect password")
+
+    return False
+
+
+if not check_password():
+    st.stop()
 
 
 def get_api_key():
@@ -32,7 +63,6 @@ if "agent" not in st.session_state:
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
-
 
 # main application loop !!!!
 for msg in st.session_state.messages:
@@ -67,5 +97,3 @@ if prompt := st.chat_input("Try: How many HR did Aaron Judge hit in 2022?"):
             "model": model_used,
         }
     )
-
-
